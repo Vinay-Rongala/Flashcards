@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Flashcards</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background"></div>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="title">Language Flashcards</h1>
+            <div class="header-controls">
+                <div class="status-badge">
+                    <span class="status-icon">📚</span>
+                    <span id="wordCount">0</span> words stored
+                </div>
+                <button class="reset-btn" id="resetBtn">Reset All Data</button>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-tab="upload">
+                <span class="tab-icon">📤</span>
+                <span>Upload</span>
+            </button>
+            <button class="nav-tab" data-tab="flashcards">
+                <span class="tab-icon">🃏</span>
+                <span>Flashcards</span>
+            </button>
+            <button class="nav-tab" data-tab="sentences">
+                <span class="tab-icon">📝</span>
+                <span>Sentences</span>
+            </button>
+            <button class="nav-tab" data-tab="mcq">
+                <span class="tab-icon">❓</span>
+                <span>MCQ Quiz</span>
+            </button>
+        </nav>
+
+        <!-- Status Messages -->
+        <div class="status-container">
+            <div class="status-message hidden" id="statusMessage"></div>
+        </div>
+
+        <!-- Upload Section -->
+        <section class="tab-content active" id="upload-section">
+            <div class="glass-card upload-card">
+                <h2 class="section-title">Upload Document</h2>
+                <p class="section-desc">Upload a PDF, DOCX, or TXT file containing English and foreign word pairs</p>
+
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <p class="upload-text">Drag & drop your files here</p>
+                    <p class="upload-subtext">or click to browse (multiple files supported)</p>
+                    <p class="upload-formats">Supported formats: PDF, DOCX, TXT</p>
+                    <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.text" multiple hidden>
+                </div>
+
+                <div class="selected-files" id="selectedFiles"></div>
+
+                <button class="btn btn-primary upload-btn" id="uploadBtn" disabled>
+                    <span class="btn-icon">⬆️</span>
+                    Upload & Extract Words
+                </button>
+
+                <div class="upload-status" id="uploadStatus"></div>
+            </div>
+        </section>
+
+        <!-- Flashcards Section -->
+        <section class="tab-content" id="flashcards-section">
+            <div class="glass-card">
+                <h2 class="section-title">Flashcards</h2>
+                <p class="section-desc">Click on a card to flip and see the translation</p>
+
+                <div class="flashcard-container" id="flashcardContainer">
+                    <div class="empty-state">
+                        <span class="empty-icon">🃏</span>
+                        <p>No flashcards yet</p>
+                        <p class="empty-hint">Upload a document to get started</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sentences Section -->
+        <section class="tab-content" id="sentences-section">
+            <div class="glass-card">
+                <h2 class="section-title">Example Sentences</h2>
+                <p class="section-desc">Learn how words are used in context</p>
+
+                <div class="sentences-container" id="sentencesContainer">
+                    <div class="empty-state">
+                        <span class="empty-icon">📝</span>
+                        <p>No sentences yet</p>
+                        <p class="empty-hint">Upload a document and generate sentences</p>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="generateSentencesBtn" disabled>
+                    <span class="btn-icon">✨</span>
+                    Generate Sentences
+                </button>
+            </div>
+        </section>
+
+        <!-- MCQ Section -->
+        <section class="tab-content" id="mcq-section">
+            <div class="glass-card">
+                <h2 class="section-title">MCQ Quiz</h2>
+                <p class="section-desc">Test your knowledge with multiple choice questions</p>
+
+                <div class="quiz-header" id="quizHeader">
+                    <div class="quiz-score">
+                        <span class="score-label">Score:</span>
+                        <span class="score-value" id="currentScore">0</span>
+                        <span class="score-separator">/</span>
+                        <span class="score-total" id="totalScore">0</span>
+                    </div>
+                    <div class="quiz-progress">
+                        <span>Question</span>
+                        <span id="questionNumber">0</span>
+                        <span>of</span>
+                        <span id="totalQuestions">0</span>
+                    </div>
+                </div>
+
+                <div class="quiz-container" id="quizContainer">
+                    <div class="empty-state">
+                        <span class="empty-icon">❓</span>
+                        <p>No quiz ready</p>
+                        <p class="empty-hint">Need at least 4 words to start a quiz</p>
+                    </div>
+                </div>
+
+                <div class="quiz-controls">
+                    <button class="btn btn-primary" id="startQuizBtn" disabled>
+                        <span class="btn-icon">🎯</span>
+                        Start Quiz
+                    </button>
+                    <button class="btn btn-secondary hidden" id="resetQuizBtn">
+                        <span class="btn-icon">🔄</span>
+                        Reset Quiz
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

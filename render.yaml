@@ -1,0 +1,26 @@
+# Render.com deployment configuration
+# Deploy the FastAPI backend to Render free tier
+
+services:
+  - type: web
+    name: flashcard-api
+    runtime: python
+    plan: free
+    env: python
+
+    # Build configuration
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+
+    # Health check
+    healthCheckPath: /health
+
+    # Environment variables (set these in Render dashboard)
+    # OLLAMA_BASE_URL: http://localhost:11434
+    # OLLAMA_MODEL: mistral:latest
+
+    # Auto-deploy on git push
+    branch: main
+    envVars:
+      - key: PORT
+        value: 10000

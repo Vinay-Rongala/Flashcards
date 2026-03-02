@@ -1,0 +1,24 @@
+# Netlify deployment configuration
+# Deploy the frontend to Netlify
+
+[build]
+  # Publish directory (where index.html is located)
+  publish = "frontend"
+
+  # No build command needed for static files
+  command = ""
+
+# Redirect all routes to index.html for SPA-like behavior
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
