@@ -13,13 +13,14 @@ import uvicorn
 
 from parser import DocumentParser
 from ollama_client import OllamaClient, OllamaClientError
-
+from dotenv import load_dotenv
+load_dotenv()
 
 # ============================================
 # Configuration
 # ============================================
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral:latest")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -38,7 +39,7 @@ app.add_middleware(
 )
 
 # Initialize Ollama client with environment variables
-ollama_client = OllamaClient(base_url=OLLAMA_BASE_URL, model=OLLAMA_MODEL)
+ollama_client = OllamaClient()
 
 
 # Pydantic models for request/response
@@ -89,19 +90,13 @@ async def root():
     }
 
 
-@app.get("/health", response_model=HealthResponse, tags=["Health"])
+@app.get("/health", tags=["Health"])
 async def health_check():
-    """
-    Health check endpoint.
-    Returns API status and Ollama connection status.
-    """
-    ollama_connected = ollama_client._check_connection()
-
     return {
         "status": "healthy",
-        "ollama_connected": ollama_connected,
-        "ollama_url": ollama_client.base_url,
-        "model": ollama_client.model
+        "ai_provider": "Groq",
+        "model": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
+        "groq_api_key_set": bool(os.getenv("GROQ_API_KEY", ""))
     }
 
 
@@ -273,13 +268,13 @@ async def generate_mcq(request: MCQRequest):
 # Error handlers
 @app.exception_handler(OllamaClientError)
 async def ollama_exception_handler(request, exc):
-    """Handle Ollama client errors."""
+    """Handle AI client errors."""
     return HTTPException(
         status_code=503,
         detail={
             "error": "AI Service Unavailable",
             "message": str(exc),
-            "suggestion": f"Please ensure Ollama is running on {OLLAMA_BASE_URL}"
+            "suggestion": "Please ensure your GROQ_API_KEY is set in the .env file"
         }
     )
 

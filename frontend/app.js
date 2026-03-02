@@ -1,5 +1,6 @@
 // Language Flashcards - Frontend Application
-
+// python -m http.server 3000
+// uvicorn main:app --reload --port 8000
 // ============================================
 // CONFIGURATION - Easy to change for deployment
 // ============================================
