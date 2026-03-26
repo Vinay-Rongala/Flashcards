@@ -352,100 +352,74 @@ class GroqClient:
         word_pairs: List[Dict[str, str]],
         api_key: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """
-        Generate MCQ questions where:
-        - The LLM creates a fill-in-the-blank sentence in the foreign language
-          (the foreign word is replaced with _____)
-        - Python builds the answer options: 1 correct + 3 random distractors
-        - Options are shuffled; the correct answer is guaranteed to be among them
-        """
-        pairs = word_pairs[:20]
-        unique_foreign_words = list(set([p["foreign"] for p in pairs]))
-        pairs_text = "\n".join([f"{p['english']} = {p['foreign']}" for p in pairs])
+        # Randomly sample up to 20 pairs to ensure variety each time
+        all_pairs = list(word_pairs)
+        random.shuffle(all_pairs)
+        selected_pairs = all_pairs[:20]
 
-        # Ask LLM to generate fill-in-the-blank sentences
+        pairs_text = "\n".join([f"{p['english']} = {p['foreign']}" for p in selected_pairs])
+
+        # Ask LLM to generate questions and distractors
         prompt = (
-            "For each word pair below, write a short, natural sentence in the FOREIGN language "
-            "that uses the foreign word. Then replace the foreign word with _____.\n\n"
-            "Return ONLY a valid JSON array. Each element must have exactly these keys:\n"
+            "For each word pair below, create a multiple-choice question in the FOREIGN language.\n"
+            "1. Create a natural sentence in the foreign language using the word, then replace it with _____.\n"
+            "2. Provide the correct foreign word.\n"
+            "3. Provide 3 plausible WRONG distractors (also in the foreign language).\n\n"
+            "Return ONLY a valid JSON array. Each element must have these keys:\n"
             "  \"english\"  — the English word\n"
-            "  \"foreign\"  — the correct foreign word (the answer)\n"
-            "  \"sentence\" — the foreign-language sentence with the foreign word replaced by _____\n\n"
-            "EXAMPLE:\n"
-            '[{"english":"apple","foreign":"Apfel","sentence":"Der _____ liegt auf dem Tisch."}]\n\n'
+            "  \"foreign\"  — the correct foreign word\n"
+            "  \"sentence\" — the sentence with _____\n"
+            "  \"distractors\" — array of 3 wrong foreign words\n\n"
             f"Word pairs:\n{pairs_text}"
         )
 
-        # Build a lookup: english_word -> {foreign, sentence}
-        sentence_map: Dict[str, Dict] = {}
+        result = []
         try:
             response = self._generate(prompt, api_key)
             items = self._parse_json_from_response(response)
             
             if isinstance(items, dict):
-                found_list = False
-                for val in items.values():
-                    if isinstance(val, list):
-                        items = val
-                        found_list = True
-                        break
-                if not found_list:
-                    items = [items]
-
+                items = items.get("questions", items.get("items", [items]))
+            
             if isinstance(items, list):
                 for item in items:
-                    if isinstance(item, dict):
-                        item_lower = {str(k).lower(): v for k, v in item.items() if isinstance(k, str)}
-                        if "english" in item_lower and "foreign" in item_lower and "sentence" in item_lower:
-                            sentence_map[str(item_lower["english"]).strip().lower()] = {
-                                "foreign": str(item_lower["foreign"]).strip(),
-                                "sentence": str(item_lower["sentence"]).strip()
-                            }
-        except GroqClientError as e:
-            logger.warning(f"Sentence generation for MCQ failed: {e}")
-            raise e
+                    if not isinstance(item, dict): continue
+                    
+                    item_lower = {str(k).lower(): v for k, v in item.items() if isinstance(k, str)}
+                    eng = str(item_lower.get("english", "")).strip()
+                    correct = str(item_lower.get("foreign", "")).strip()
+                    sentence = str(item_lower.get("sentence", "")).strip()
+                    distractors = item_lower.get("distractors", [])
+                    
+                    if not eng or not correct or not sentence: continue
+                    if not isinstance(distractors, list) or len(distractors) < 3:
+                        # Fallback distractor logic if AI fails to provide them
+                        unique_f = list(set([p["foreign"] for p in selected_pairs if p["foreign"] != correct]))
+                        random.shuffle(unique_f)
+                        distractors = unique_f[:3]
+                    
+                    if len(distractors) < 3: continue
 
-        # Build final MCQ list — Python controls all options (no hallucinations)
-        result = []
-        for pair in pairs:
-            correct = pair["foreign"]
-            english = pair["english"]
+                    # Build and shuffle options
+                    options = [correct] + [str(d) for d in distractors[:3]]
+                    random.shuffle(options)
 
-            # Distractors: any other foreign word from the same word list (deduplicated)
-            distractors = [w for w in unique_foreign_words if w != correct]
-            random.shuffle(distractors)
-            wrong_options = distractors[:3]
+                    # Clean UI sentence
+                    import re
+                    clean_sentence = re.sub(r'(?i)^(fill in the blanks?|fill the blank|fill in the gaps?|fill in):\s*', '', sentence).strip()
 
-            # Need at least 3 distractors for a 4-choice question
-            if len(wrong_options) < 3:
-                logger.warning(f"Skipping '{english}' — not enough distractors")
-                continue
+                    result.append({
+                        "question": clean_sentence if "_____" in clean_sentence else f"What is the foreign translation of '{eng}'?",
+                        "correct": correct,
+                        "options": options,
+                        "english": eng,
+                        "foreign": correct
+                    })
+        except Exception as e:
+            logger.warning(f"AI MCQ generation failed: {e}. Falling back to basic logic.")
+            # Basic fallback would go here if needed, but we'll let the UI handle empty results
+            raise GroqClientError(f"Failed to generate varied MCQs: {str(e)}")
 
-            # Build options list: correct answer + distractors, then shuffle
-            options = [correct] + wrong_options
-            random.shuffle(options)
-
-            # Sanity check: correct answer must be in options
-            assert correct in options, f"Correct answer '{correct}' missing from options — bug!"
-
-            # Fetch LLM sentence or fall back to a plain question
-            llm_data = sentence_map.get(english.lower(), {})
-            sentence = llm_data.get("sentence", "")
-            if sentence and "_____" in sentence:
-                # Remove LLM chatty prefixes to keep UI clean
-                import re
-                clean_sentence = re.sub(r'(?i)^(fill in the blanks?|fill the blank|fill in the gaps?|fill in):\s*', '', sentence).strip()
-                question_text = clean_sentence
-            else:
-                # Fallback if LLM didn't produce a sentence
-                question_text = f"What is the foreign translation of '{english}'?"
-
-            result.append({
-                "question": question_text,
-                "correct": correct,
-                "options": options,
-                "english": english,
-                "foreign": correct
-            })
+        return result
 
         return result
