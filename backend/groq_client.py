@@ -8,14 +8,15 @@ import re
 import logging
 import os
 import random
+import requests
 from typing import Dict, List, Any, Optional
-from urllib import request, error as urllib_error
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-MODEL_NAME = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+DEFAULT_MODEL = "llama-3.3-70b-versatile"
+MODEL_NAME = os.getenv("GROQ_MODEL", DEFAULT_MODEL)
 CHUNK_SIZE = 3000
 
 
@@ -50,7 +51,7 @@ class GroqClient:
         """Send prompt to Groq API, return text response."""
         key = self._resolve_key(api_key)
 
-        payload = json.dumps({
+        payload = {
             "model": self.model,
             "messages": [
                 {
@@ -68,32 +69,37 @@ class GroqClient:
             ],
             "temperature": 0.3,
             "max_tokens": 2048
-        }).encode("utf-8")
+        }
 
-        req = request.Request(
-            GROQ_API_URL,
-            data=payload,
-            headers={
-                "Authorization": f"Bearer {key}",
-                "Content-Type": "application/json",
-            },
-            method="POST"
-        )
+        headers = {
+            "Authorization": f"Bearer {key}",
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "application/json",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
 
         try:
             logger.info(f"Calling Groq API with model: {self.model}")
-            with request.urlopen(req, timeout=300) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                result = data["choices"][0]["message"]["content"]
-                logger.info(f"Groq response length: {len(result)} chars")
-                return result
-        except urllib_error.HTTPError as e:
-            body = e.read().decode("utf-8")
-            logger.error(f"Groq API error {e.code}: {body}")
-            raise GroqClientError(f"Groq API error {e.code}: {body}")
-        except urllib_error.URLError as e:
+            response = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=120)
+            
+            if response.status_code != 200:
+                logger.error(f"Groq API error {response.status_code}: {response.text}")
+                # Specifically handle Cloudflare 1010
+                if response.status_code == 403 and "1010" in response.text:
+                    raise GroqClientError("Groq API access blocked by security filter (Error 1010). Please try again or check your API key.")
+                raise GroqClientError(f"Groq API error {response.status_code}: {response.text}")
+
+            data = response.json()
+            result = data["choices"][0]["message"]["content"]
+            logger.info(f"Groq response length: {len(result)} chars")
+            return result
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Network error calling Groq: {str(e)}")
             raise GroqClientError(f"Network error calling Groq: {str(e)}")
         except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}")
             raise GroqClientError(f"Unexpected error: {str(e)}")
 
     def _parse_json_from_response(self, response: str) -> Any:

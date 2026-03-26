@@ -112,7 +112,7 @@ async def health_check():
     return {
         "status": "healthy",
         "ai_provider": "Groq",
-        "model": os.getenv("GROQ_MODEL", "llama3-70b-8192"),
+        "model": os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile"),
         "note": "Pass your Groq API key in the X-Groq-Api-Key request header"
     }
 
