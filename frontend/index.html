@@ -1,14 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Language Flashcards</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+    <!-- ======================================================= -->
+    <!-- API Key Modal (shown on first load or when key missing) -->
+    <!-- ======================================================= -->
+    <div class="modal-overlay" id="apiKeyModal">
+        <div class="modal-card glass-card">
+            <div class="modal-icon">🔑</div>
+            <h2 class="modal-title">Enter Groq API Key</h2>
+            <p class="modal-desc">
+                Your key is stored only in your browser's local storage and is never sent anywhere except directly to
+                the Groq API.
+            </p>
+            <div class="modal-input-group">
+                <input type="password" id="apiKeyInput" class="api-key-input" placeholder="gsk_..." autocomplete="off"
+                    spellcheck="false" />
+                <button class="toggle-visibility-btn" id="toggleApiKeyVisibility" title="Show / hide key">👁</button>
+            </div>
+            <p class="modal-hint">
+                Get a free key at <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a>
+            </p>
+            <button class="btn btn-primary modal-submit" id="apiKeySubmit" disabled>
+                <span class="btn-icon">✅</span> Save &amp; Continue
+            </button>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- Main App                                                 -->
+    <!-- ======================================================= -->
     <div class="background"></div>
-    <div class="container">
+    <div class="container" id="mainApp" style="display:none">
         <!-- Header -->
         <header class="header">
             <h1 class="title">Language Flashcards</h1>
@@ -17,6 +47,7 @@
                     <span class="status-icon">📚</span>
                     <span id="wordCount">0</span> words stored
                 </div>
+                <button class="change-key-btn" id="changeKeyBtn" title="Change Groq API key">🔑 Change Key</button>
                 <button class="reset-btn" id="resetBtn">Reset All Data</button>
             </div>
         </header>
@@ -54,7 +85,7 @@
 
                 <div class="upload-area" id="uploadArea">
                     <div class="upload-icon">📁</div>
-                    <p class="upload-text">Drag & drop your files here</p>
+                    <p class="upload-text">Drag &amp; drop your files here</p>
                     <p class="upload-subtext">or click to browse (multiple files supported)</p>
                     <p class="upload-formats">Supported formats: PDF, DOCX, TXT</p>
                     <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.text" multiple hidden>
@@ -64,7 +95,7 @@
 
                 <button class="btn btn-primary upload-btn" id="uploadBtn" disabled>
                     <span class="btn-icon">⬆️</span>
-                    Upload & Extract Words
+                    Upload &amp; Extract Words
                 </button>
 
                 <div class="upload-status" id="uploadStatus"></div>
@@ -112,9 +143,9 @@
         <section class="tab-content" id="mcq-section">
             <div class="glass-card">
                 <h2 class="section-title">MCQ Quiz</h2>
-                <p class="section-desc">Test your knowledge with multiple choice questions</p>
+                <p class="section-desc">Fill in the blank — choose the correct foreign word</p>
 
-                <div class="quiz-header" id="quizHeader">
+                <div class="quiz-header" id="quizHeader" style="display:none">
                     <div class="quiz-score">
                         <span class="score-label">Score:</span>
                         <span class="score-value" id="currentScore">0</span>
@@ -153,4 +184,5 @@
 
     <script src="app.js"></script>
 </body>
+
 </html>

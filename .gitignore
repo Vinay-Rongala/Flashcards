@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+**/.env
+.env.*
+!.env.example
+.venv
+
+# Frontend
+.claude/
+.gemini/
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db

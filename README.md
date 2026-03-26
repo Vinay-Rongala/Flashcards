@@ -1,116 +1,66 @@
-# Language Flashcards App
+# Language Flashcards 🃏
 
-A web app that turns vocabulary documents into an interactive language learning experience. Upload a document, and the app automatically extracts English-foreign word pairs and gives you three ways to study them.
+A modern, AI-powered language learning application built with **FastAPI** (Backend) and **Vanilla JS** (Frontend). This app allows users to upload vocabulary documents (PDF, DOCX, TXT) and automatically generates flashcards, example sentences, and interactive MCQ quizzes using the **Groq API** (Llama 3).
 
----
+## ✨ Features
 
-## Features
+- **AI Extraction:** Automatically extracts English-foreign word pairs from uploaded documents.
+- **Robust Parsing:** Fail-safe JSON extraction that handles varied AI response formats.
+- **Interactive Flashcards:** Digital cards with a sleek glassmorphism design.
+- **Example Sentences:** AI-generated bilingual sentences for better context.
+- **MCQ Quizzes:** Interactive multiple-choice quizzes with intelligent distractor generation.
+- **Quiz Review:** High-performance summary screen to review all answered questions.
+- **Privacy First:** Your API keys are stored only in your browser's local storage.
 
-- 📄 **Multi-File Upload** — Upload multiple PDF, DOCX, or TXT files at once
-- 🃏 **Flashcards** — Click-to-flip cards showing English on front, translation on back
-- 📝 **Example Sentences** — AI-generated sentences showing each word in context
-- ❓ **MCQ Quiz** — Multiple choice questions built from your uploaded words
-- 💾 **Persistent Storage** — Words saved in browser localStorage, survive page refresh
-- 🔄 **Merge Uploads** — New uploads add to existing words, nothing gets overwritten
-- 🗑️ **Reset** — One button clears all stored data
-- 📱 **Responsive** — Works on desktop and mobile
+## 🛠️ Tech Stack
 
----
+- **Frontend:** HTML5, CSS3 (Vanilla), JavaScript (ES6+).
+- **Backend:** Python, FastAPI, Uvicorn.
+- **AI Models:** Groq (Llama-3.3-70b-versatile).
+- **Parsing:** python-docx, PyPDF2.
 
-## Tech Stack
+## 🚀 Getting Started
 
-| Layer | Technology |
-|---|---|
-| Backend | Python, FastAPI |
-| Frontend | HTML, CSS, JavaScript |
-| AI | Ollama (`mistral:latest`) |
-| File Parsing | pypdf, python-docx |
-| Storage | Browser localStorage |
-| Deployment | Render.com (backend), Netlify (frontend) |
+### Prerequisites
 
----
+- Python 3.8+
+- [Ollama](https://ollama.ai/) (if running local models) or a **Groq API Key**.
 
-## Project Structure
+### Local Installation
 
-```
-flashcard-app/
-├── backend/
-│   ├── main.py               # FastAPI app and API endpoints
-│   ├── parser.py             # Text extraction from PDF, DOCX, TXT
-│   ├── ollama_client.py      # Ollama API integration
-│   └── requirements.txt
-├── frontend/
-│   ├── index.html            # App UI
-│   ├── style.css             # Glassmorphism styling
-│   └── app.js                # Frontend logic and localStorage
-├── render.yaml               # Render.com deployment config
-├── netlify.toml              # Netlify deployment config
-├── .env.example
-├── CLAUDE.md
-└── README.md
-```
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Vinay-Rongala/Flashcards.git
+   cd Flashcards
+   ```
 
----
+2. **Setup Backend:**
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   # Create a .env file and add your keys (optional for local dev if using browser UI)
+   # GROQ_API_KEY=your_key_here
+   uvicorn main:app --reload --port 8000
+   ```
 
-## API Endpoints
+3. **Setup Frontend:**
+   ```bash
+   cd ../frontend
+   # Use any simple static server
+   python -m http.server 3000
+   ```
+   Open `http://localhost:3000` in your browser.
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/health` | Health check and Ollama status |
-| POST | `/upload` | Upload files and extract word pairs |
-| POST | `/flashcards` | Format word pairs as flashcards |
-| POST | `/sentences` | Generate example sentences |
-| POST | `/mcq` | Generate MCQ questions |
+## 🌐 Deployment
 
----
+### Backend (Render)
+1. Create a new **Web Service** on Render.
+2. Connect this repository.
+3. Render will use `render.yaml` to automatically configure the service.
 
-## Local Setup
+### Frontend (Netlify)
+1. Deploy the `frontend/` folder to Netlify.
+2. IMPORTANT: Update `CONFIG.API_BASE_URL` in `frontend/app.js` to point to your Render backend URL.
 
-**Prerequisites:** Python 3.8–3.12, Ollama installed
-
-```bash
-# 1. Pull the AI model
-ollama pull mistral:latest
-
-# 2. Install backend dependencies
-cd backend
-pip install -r requirements.txt
-
-# 3. Run the backend
-uvicorn main:app --reload --port 8000
-
-# 4. Serve the frontend (new terminal)
-cd frontend
-python -m http.server 3000
-```
-
-Open `http://localhost:3000` in your browser.
-
----
-
-## Deployment
-
-**Backend → Render.com**
-- Build command: `cd backend && pip install -r requirements.txt`
-- Start command: `cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT`
-- Environment variables: `OLLAMA_BASE_URL`, `OLLAMA_MODEL`
-
-**Frontend → Netlify**
-- Update `API_BASE_URL` in `frontend/app.js` to your Render backend URL
-- Drag and drop the `frontend/` folder to Netlify
-
----
-
-## Usage
-
-1. Go to the **Upload** tab and select one or more vocabulary documents
-2. Switch to **Flashcards** to review words by flipping cards
-3. Go to **Sentences** to see each word used in a real sentence
-4. Open **MCQ Quiz** to test yourself and track your score
-5. Hit **Reset All Data** to start fresh
-
----
-
-## License
-
+## 📄 License
 MIT License

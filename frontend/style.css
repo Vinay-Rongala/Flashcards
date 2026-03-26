@@ -43,8 +43,15 @@ body {
 }
 
 @keyframes gradientShift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
 }
 
 /* Container */
@@ -210,6 +217,7 @@ body {
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -227,8 +235,15 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Glass Card */
@@ -376,8 +391,15 @@ body {
 }
 
 @keyframes progressAnim {
-    0%, 100% { transform: translateX(-30%); }
-    50% { transform: translateX(30%); }
+
+    0%,
+    100% {
+        transform: translateX(-30%);
+    }
+
+    50% {
+        transform: translateX(30%);
+    }
 }
 
 /* Selected Files */
@@ -528,11 +550,25 @@ body {
     animation: fadeIn 0.4s ease;
 }
 
-.sentence-card:nth-child(1) { animation-delay: 0.05s; }
-.sentence-card:nth-child(2) { animation-delay: 0.1s; }
-.sentence-card:nth-child(3) { animation-delay: 0.15s; }
-.sentence-card:nth-child(4) { animation-delay: 0.2s; }
-.sentence-card:nth-child(5) { animation-delay: 0.25s; }
+.sentence-card:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.sentence-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.sentence-card:nth-child(3) {
+    animation-delay: 0.15s;
+}
+
+.sentence-card:nth-child(4) {
+    animation-delay: 0.2s;
+}
+
+.sentence-card:nth-child(5) {
+    animation-delay: 0.25s;
+}
 
 .sentence-word {
     display: flex;
@@ -726,7 +762,9 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .loading-text {
@@ -832,3 +870,164 @@ body {
         padding: 15px;
     }
 }
+
+/* ===================================================
+   API KEY MODAL
+   =================================================== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(10, 10, 30, 0.85);
+    backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-card {
+    width: min(480px, 92vw);
+    text-align: center;
+    padding: 40px 36px;
+    animation: fadeIn 0.35s ease;
+}
+
+.modal-icon {
+    font-size: 3.5rem;
+    margin-bottom: 14px;
+}
+
+.modal-title {
+    font-size: clamp(1.4rem, 4vw, 1.9rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+}
+
+.modal-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+.modal-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.api-key-input {
+    flex: 1;
+    padding: 13px 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-family: 'Courier New', monospace;
+    outline: none;
+    transition: border-color 0.25s ease;
+}
+
+.api-key-input:focus {
+    border-color: var(--accent);
+    background: rgba(124, 58, 237, 0.1);
+}
+
+.api-key-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+.toggle-visibility-btn {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid var(--glass-border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+}
+
+.toggle-visibility-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.modal-hint {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-bottom: 22px;
+}
+
+.modal-hint a {
+    color: #a78bfa;
+    text-decoration: none;
+}
+
+.modal-hint a:hover {
+    text-decoration: underline;
+}
+
+.modal-submit {
+    width: 100%;
+    justify-content: center;
+    padding: 14px;
+    font-size: 1rem;
+}
+
+/* ===================================================
+   CHANGE KEY BUTTON (in header)
+   =================================================== */
+.change-key-btn {
+    padding: 10px 18px;
+    background: rgba(124, 58, 237, 0.15);
+    border: 1px solid rgba(124, 58, 237, 0.45);
+    border-radius: 50px;
+    color: #c084fc;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.change-key-btn:hover {
+    background: rgba(124, 58, 237, 0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+}
+
+/* ===================================================
+   QUIZ RESULT PERCENTAGE
+   =================================================== */
+.result-percentage {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+} 
+ / *   Q u i z   H i s t o r y   * /  
+ . q u i z - h i s t o r y - c o n t a i n e r   {   w i d t h :   1 0 0 % ;   t e x t - a l i g n :   l e f t ;   }  
+ . q u i z - h i s t o r y - t i t l e   {   f o n t - s i z e :   1 . 2 5 r e m ;   m a r g i n - b o t t o m :   1 r e m ;   t e x t - a l i g n :   c e n t e r ;   f o n t - w e i g h t :   6 0 0 ;   c o l o r :   # f 8 f a f c ;   }  
+ . q u i z - h i s t o r y - l i s t   {   d i s p l a y :   f l e x ;   f l e x - d i r e c t i o n :   c o l u m n ;   g a p :   1 r e m ;   }  
+ . h i s t o r y - i t e m   {   p a d d i n g :   1 . 2 5 r e m ;   b o r d e r - r a d i u s :   1 2 p x ;   b a c k g r o u n d :   r g b a ( 2 5 5 , 2 5 5 , 2 5 5 , 0 . 0 5 ) ;   b o r d e r - l e f t :   4 p x   s o l i d   # 6 4 7 4 8 b ;   f o n t - s i z e :   1 r e m ;   }  
+ . h i s t o r y - i t e m . h i s t o r y - c o r r e c t   {   b o r d e r - l e f t - c o l o r :   # 1 0 b 9 8 1 ;   }  
+ . h i s t o r y - i t e m . h i s t o r y - i n c o r r e c t   {   b o r d e r - l e f t - c o l o r :   # e f 4 4 4 4 ;   }  
+ . h i s t o r y - q   {   m a r g i n - b o t t o m :   0 . 7 5 r e m ;   c o l o r :   # f 8 f a f c ;   l i n e - h e i g h t :   1 . 4 ;   }  
+ . h i s t o r y - a ,   . h i s t o r y - c   {   m a r g i n - b o t t o m :   0 . 2 5 r e m ;   c o l o r :   # c b d 5 e 1 ;   }  
+ . t e x t - s u c c e s s   {   c o l o r :   # 1 0 b 9 8 1 ;   f o n t - w e i g h t :   6 0 0 ;   }  
+ . t e x t - d a n g e r   {   c o l o r :   # e f 4 4 4 4 ;   f o n t - w e i g h t :   6 0 0 ;   }  
+ 

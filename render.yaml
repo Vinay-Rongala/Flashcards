@@ -15,9 +15,8 @@ services:
     # Health check
     healthCheckPath: /health
 
-    # Environment variables (set these in Render dashboard)
-    # OLLAMA_BASE_URL: http://localhost:11434
-    # OLLAMA_MODEL: mistral:latest
+    # Environment variables (set these in Render dashboard if needed)
+    # GROQ_MODEL: llama3-70b-8192
 
     # Auto-deploy on git push
     branch: main
