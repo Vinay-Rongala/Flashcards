@@ -635,8 +635,8 @@ function renderQuestion() {
     elements.quizContainer.innerHTML = `
         <div class="quiz-question">
             <p class="question-text">
-                <button class="speaker-btn" data-text="${escapeHtml(question.question)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
-                ${escapeHtml(question.question)}
+                <button class="speaker-btn" data-text="${escapeHtml(question.sentence)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
+                ${escapeHtml(question.sentence)}
             </p>
             <div class="quiz-options">
                 ${question.options.map(option => `
@@ -693,7 +693,7 @@ function selectOption(selected, correct, button) {
     }
 
     // Form the full sentence with the correct answer and remove the hint
-    const fullSentence = mcqQuestions[currentQuizIndex].question
+    const fullSentence = mcqQuestions[currentQuizIndex].sentence
         .replace(/_____\s*\([^)]+\)/, correct)
         .replace(/_____/, correct);
     
