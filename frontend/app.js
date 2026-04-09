@@ -5,7 +5,7 @@
 // ============================================================
 const CONFIG = {
     // Change to your Render backend URL when deploying to production
-    API_BASE_URL: 'http://127.0.0.1:8000',
+    API_BASE_URL: 'https://flashcards-b935.onrender.com',
     API_TIMEOUT: 120000,
     DEBUG_MODE: true
 };
