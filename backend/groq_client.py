@@ -359,18 +359,25 @@ class GroqClient:
 
         pairs_text = "\n".join([f"{p['english']} = {p['foreign']}" for p in selected_pairs])
 
-        # Ask LLM to generate questions and distractors
+        # Ask LLM to generate high-quality questions and distractors
         prompt = (
-            "For each word pair below, create a multiple-choice question in the FOREIGN language.\n"
-            "1. Create a natural sentence in the foreign language using the word, then replace it with _____.\n"
-            "2. Provide the correct foreign word.\n"
-            "3. Provide 3 plausible WRONG distractors (also in the foreign language).\n\n"
-            "Return ONLY a valid JSON array. Each element must have these keys:\n"
+            "You are an expert language examiner creating a standardized vocabulary test (like Goethe-Institut, TELC, or CEFR exams).\n"
+            "For each word pair below, fetch or construct a highly standardized, realistic test question.\n"
+            "RULES FOR QUESTIONS:\n"
+            "1. Create a natural, commonly used sentence from standard language testing. Replace the target word with '_____' and immediately provide its English hint in parentheses. Example: 'Ich esse einen _____ (apple).'\n"
+            "2. The correct answer MUST be the exact 'foreign' word from the provided pair.\n"
+            "3. Provide EXACTLY 3 WRONG distractors.\n"
+            "   - Distractors must be real words in the foreign language.\n"
+            "   - Distractors MUST NOT be synonyms of the correct answer.\n"
+            "   - Distractors must be grammatically incorrect or logically flawed in the sentence context.\n"
+            "   - Ensure there is absolutely ONLY ONE valid answer that matches both the context and the English hint.\n"
+            "4. Make the sentences feel like a real, standardized language certification exam rather than random strings.\n\n"
+            "Return ONLY a valid JSON array. Each element must have these exact keys:\n"
             "  \"english\"  — the English word\n"
             "  \"foreign\"  — the correct foreign word\n"
-            "  \"sentence\" — the sentence with _____\n"
-            "  \"distractors\" — array of 3 wrong foreign words\n\n"
-            f"Word pairs:\n{pairs_text}"
+            "  \"sentence\" — the standardized test sentence with the blank and hint (e.g. '_____ (Hello), wie geht\\'s?')\n"
+            "  \"distractors\" — array of exactly 3 definitively wrong foreign words\n\n"
+            f"Word pairs to test:\n{pairs_text}"
         )
 
         result = []

@@ -4,8 +4,10 @@
 // CONFIGURATION
 // ============================================================
 const CONFIG = {
-    // Change to your Render backend URL when deploying to production
-    API_BASE_URL: 'https://flashcards-b935.onrender.com',
+    // Change YOUR_BACKEND_URL to your Render backend URL when deploying to production
+    API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://127.0.0.1:8000' 
+        : 'https://flashcards-b935.onrender.com',
     API_TIMEOUT: 120000,
     DEBUG_MODE: true
 };
@@ -184,6 +186,19 @@ async function apiFetch(endpoint, options = {}) {
         headers
     });
     return response;
+}
+
+// ============================================================
+// AUDIO HELPERS
+// ============================================================
+function playText(event, text, lang) {
+    if (event) {
+        event.stopPropagation();
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang;
+    window.speechSynthesis.speak(utterance);
 }
 
 // ============================================================
@@ -468,11 +483,21 @@ function renderFlashcards() {
     elements.flashcardContainer.innerHTML = wordPairs.map(pair => `
         <div class="flashcard" onclick="this.classList.toggle('flipped')">
             <div class="flashcard-inner">
-                <div class="flashcard-front">${escapeHtml(pair.english)}</div>
-                <div class="flashcard-back">${escapeHtml(pair.foreign)}</div>
+                <div class="flashcard-front">
+                    <span>${escapeHtml(pair.english)}</span>
+                    <button class="speaker-btn" data-text="${escapeHtml(pair.english)}" data-lang="en-US"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
+                </div>
+                <div class="flashcard-back">
+                    <span>${escapeHtml(pair.foreign)}</span>
+                    <button class="speaker-btn" data-text="${escapeHtml(pair.foreign)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
+                </div>
             </div>
         </div>
     `).join('');
+
+    elements.flashcardContainer.querySelectorAll('.speaker-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => playText(e, btn.dataset.text, btn.dataset.lang));
+    });
 }
 
 // ============================================================
@@ -523,14 +548,30 @@ function renderSentences() {
     elements.sentencesContainer.innerHTML = sentences.map(item => `
         <div class="sentence-card">
             <div class="sentence-word">
-                <span class="word-pair highlight">${escapeHtml(item.english)}</span>
+                <span class="word-pair highlight">
+                    ${escapeHtml(item.english)}
+                    <button class="speaker-btn mini" data-text="${escapeHtml(item.english)}" data-lang="en-US"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
+                </span>
                 <span class="word-separator">→</span>
-                <span class="word-pair highlight">${escapeHtml(item.foreign)}</span>
+                <span class="word-pair highlight">
+                    ${escapeHtml(item.foreign)}
+                    <button class="speaker-btn mini" data-text="${escapeHtml(item.foreign)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
+                </span>
             </div>
-            <p class="sentence-text en">${escapeHtml(item.english_sentence)}</p>
-            <p class="sentence-text foreign">${escapeHtml(item.foreign_sentence)}</p>
+            <p class="sentence-text en">
+                <button class="speaker-btn mini" data-text="${escapeHtml(item.english_sentence)}" data-lang="en-US"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
+                ${escapeHtml(item.english_sentence)}
+            </p>
+            <p class="sentence-text foreign">
+                <button class="speaker-btn mini" data-text="${escapeHtml(item.foreign_sentence)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
+                ${escapeHtml(item.foreign_sentence)}
+            </p>
         </div>
     `).join('');
+
+    elements.sentencesContainer.querySelectorAll('.speaker-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => playText(e, btn.dataset.text, btn.dataset.lang));
+    });
 }
 
 // ============================================================
@@ -593,13 +634,17 @@ function renderQuestion() {
 
     elements.quizContainer.innerHTML = `
         <div class="quiz-question">
-            <p class="question-text">${escapeHtml(question.question)}</p>
+            <p class="question-text">
+                <button class="speaker-btn" data-text="${escapeHtml(question.question)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
+                ${escapeHtml(question.question)}
+            </p>
             <div class="quiz-options">
                 ${question.options.map(option => `
                     <button class="quiz-option"
                         data-option="${escapeHtml(option)}"
                         data-correct="${escapeHtml(question.correct)}">
                         ${escapeHtml(option)}
+                        <span class="speaker-btn option-speaker" data-text="${escapeHtml(option)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></span>
                     </button>
                 `).join('')}
             </div>
@@ -609,9 +654,14 @@ function renderQuestion() {
     // Attach listeners dynamically to avoid HTML quote escaping conflicts
     const optionBtns = elements.quizContainer.querySelectorAll('.quiz-option');
     optionBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function(e) {
+            if (e.target.closest('.speaker-btn')) return; // handled below
             selectOption(this.dataset.option, this.dataset.correct, this);
         });
+    });
+
+    elements.quizContainer.querySelectorAll('.speaker-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => playText(e, btn.dataset.text, btn.dataset.lang));
     });
 }
 
@@ -641,10 +691,18 @@ function selectOption(selected, correct, button) {
         showStatusMessage(`❌ Incorrect. The answer was: ${correct}`, 'error');
     }
 
+    // Form the full sentence with the correct answer and remove the hint
+    const fullSentence = mcqQuestions[currentQuizIndex].question
+        .replace(/_____\s*\([^)]+\)/, correct)
+        .replace(/_____/, correct);
+    
+    // Read out the completed sentence aloud
+    playText(null, fullSentence, 'de-DE');
+
     setTimeout(() => {
         currentQuizIndex++;
         renderQuestion();
-    }, 1500);
+    }, 2500);
 }
 
 function showQuizResult() {
@@ -669,15 +727,30 @@ function showQuizResult() {
                 <div class="quiz-history-list">
                     ${userAnswers.map((ans, idx) => `
                         <div class="history-item ${ans.isCorrect ? 'history-correct' : 'history-incorrect'}">
-                            <p class="history-q"><strong>Q${idx + 1}:</strong> ${escapeHtml(ans.question)}</p>
-                            <p class="history-a">Your answer: <span class="${ans.isCorrect ? 'text-success' : 'text-danger'}">${escapeHtml(ans.selected)}</span></p>
-                            ${!ans.isCorrect ? `<p class="history-c">Correct answer: <span class="text-success">${escapeHtml(ans.correct)}</span></p>` : ''}
+                            <p class="history-q">
+                                <strong>Q${idx + 1}:</strong> 
+                                <button class="speaker-btn mini" data-text="${escapeHtml(ans.question)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
+                                ${escapeHtml(ans.question)}
+                            </p>
+                            <p class="history-a">Your answer: 
+                                <button class="speaker-btn mini" data-text="${escapeHtml(ans.selected)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
+                                <span class="${ans.isCorrect ? 'text-success' : 'text-danger'}">${escapeHtml(ans.selected)}</span>
+                            </p>
+                            ${!ans.isCorrect ? `<p class="history-c">Correct answer: 
+                                <button class="speaker-btn mini" data-text="${escapeHtml(ans.correct)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
+                                <span class="text-success">${escapeHtml(ans.correct)}</span></p>` : ''}
                         </div>
                     `).join('')}
                 </div>
             </div>
         </div>
     `;
+
+    setTimeout(() => {
+        elements.quizContainer.querySelectorAll('.speaker-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => playText(e, btn.dataset.text, btn.dataset.lang));
+        });
+    }, 0);
 }
 
 function updateQuizHeader() {
