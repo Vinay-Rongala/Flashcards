@@ -670,7 +670,8 @@ function selectOption(selected, correct, button) {
     options.forEach(opt => opt.disabled = true);
 
     userAnswers.push({
-        question: mcqQuestions[currentQuizIndex].question,
+        question: mcqQuestions[currentQuizIndex].sentence,
+        english_sentence: mcqQuestions[currentQuizIndex].english_sentence || "",
         selected: selected,
         correct: correct,
         isCorrect: selected === correct
@@ -725,22 +726,32 @@ function showQuizResult() {
                 <hr style="margin: 2rem 0; opacity: 0.1;">
                 <h3 class="quiz-history-title">Quiz Review</h3>
                 <div class="quiz-history-list">
-                    ${userAnswers.map((ans, idx) => `
+                    ${userAnswers.map((ans, idx) => {
+                        const highlightedSentence = ans.question
+                            .replace(/_____\s*\([^)]+\)/, `<span class="text-success">${escapeHtml(ans.correct)}</span>`)
+                            .replace(/_____/, `<span class="text-success">${escapeHtml(ans.correct)}</span>`);
+                        
+                        const speakText = ans.question
+                            .replace(/_____\s*\([^)]+\)/, ans.correct)
+                            .replace(/_____/, ans.correct);
+
+                        return `
                         <div class="history-item ${ans.isCorrect ? 'history-correct' : 'history-incorrect'}">
-                            <p class="history-q">
-                                <strong>Q${idx + 1}:</strong> 
-                                <button class="speaker-btn mini" data-text="${escapeHtml(ans.question)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
-                                ${escapeHtml(ans.question)}
-                            </p>
-                            <p class="history-a">Your answer: 
-                                <button class="speaker-btn mini" data-text="${escapeHtml(ans.selected)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
-                                <span class="${ans.isCorrect ? 'text-success' : 'text-danger'}">${escapeHtml(ans.selected)}</span>
-                            </p>
-                            ${!ans.isCorrect ? `<p class="history-c">Correct answer: 
-                                <button class="speaker-btn mini" data-text="${escapeHtml(ans.correct)}" data-lang="de-DE"><img src="volume.png" class="speaker-icon-img" alt="Listen" /></button>
-                                <span class="text-success">${escapeHtml(ans.correct)}</span></p>` : ''}
+                            <div class="history-row">
+                                <button class="speaker-btn mini" data-text="${escapeHtml(speakText)}" data-lang="de-DE">
+                                    <img src="volume.png" class="speaker-icon-img" alt="Listen" />
+                                </button>
+                                <div class="history-text-col">
+                                    <p class="history-q"><strong>Q${idx + 1}:</strong> ${highlightedSentence}</p>
+                                    ${ans.english_sentence ? `<p class="history-translation">${escapeHtml(ans.english_sentence)}</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="history-status-row">
+                                <p class="history-a">Your choice: <span class="${ans.isCorrect ? 'text-success' : 'text-danger'}">${escapeHtml(ans.selected)}</span></p>
+                                ${!ans.isCorrect ? `<p class="history-c">Correct: <span class="text-success">${escapeHtml(ans.correct)}</span></p>` : ''}
+                            </div>
                         </div>
-                    `).join('')}
+                    `;}).join('')}
                 </div>
             </div>
         </div>

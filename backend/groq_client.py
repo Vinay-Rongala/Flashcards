@@ -376,6 +376,7 @@ class GroqClient:
             "  \"english\"  — the English word\n"
             "  \"foreign\"  — the correct foreign word\n"
             "  \"sentence\" — the standardized test sentence with the blank and hint (e.g. '_____ (Hello), wie geht\\'s?')\n"
+            "  \"english_sentence\" — the full English translation of the generated sentence\n"
             "  \"distractors\" — array of exactly 3 definitively wrong foreign words\n\n"
             f"Word pairs to test:\n{pairs_text}"
         )
